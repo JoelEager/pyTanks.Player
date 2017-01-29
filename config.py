@@ -14,4 +14,4 @@ class clientSettings:
     framesPerSecond = 60            # The target frame rate for the frameCallback function
 
     # Level of debugging logging for the client
-    logLevel = 2  # 0 for normal, 1 for FPS, 2 for all client status and io logs
+    logLevel = 1  # 0 for normal, 1 for FPS, 2 for all client status and io logs

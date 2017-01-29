@@ -102,7 +102,7 @@ def runClient(loopCallback):
                 message = await websocket.recv()
                 incoming.append(message)
 
-                logPrint("Received message from server: " + message, 3)
+                logPrint("Received message from server: " + message, 2)
 
     # --- Client startup code: ---
     try:
