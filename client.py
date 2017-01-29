@@ -2,7 +2,8 @@ import asyncio
 import websockets
 import datetime
 import config
-import aiPlayer
+
+# This script handles communication with the server and runs the ai's loop function
 
 outgoing = list()   # The outgoing message queue
 
@@ -11,7 +12,7 @@ def sendCommand(command):
     outgoing.append(command)
 
 # Connects to the server and configures the asyncio tasks used to run the client
-async def runClient():
+def runClient(loopCallback):
     incoming = list()
 
     # --- Internal client API functions: ---
@@ -27,7 +28,7 @@ async def runClient():
         return diff.seconds + (diff.microseconds / 1000000)
 
     # Sends queued messages to the server
-    async def sendTask():
+    async def sendTask(websocket):
         while True:
             if len(outgoing) != 0:
                 message = outgoing.pop(0)
@@ -78,33 +79,34 @@ async def runClient():
                     lastFSPLog = datetime.datetime.now()
 
             # TODO - Update game state
+            if len(incoming) != 0:
+                incoming.pop()
 
             # Run the callback
-            aiPlayer.aiLoop(frameDelta)
+            loopCallback(frameDelta)
 
             # Sleep until the next frame
             await asyncio.sleep(delay)  # (If this doesn't sleep then the other tasks can never be completed.)
 
+    # Connects to the server, starts the other tasks, and handles incoming messages
+    async def mainTask():
+        async with websockets.connect("ws://127.0.0.1:5678/playerAPI") as websocket:
+            print("Connected to server")
+
+            # Start the sendTask and frameLoop
+            asyncio.get_event_loop().create_task(sendTask(websocket))
+            asyncio.get_event_loop().create_task(frameLoop())
+
+            # Handles incoming messages
+            while True:
+                message = await websocket.recv()
+                incoming.append(message)
+
+                logPrint("Received message from server: " + message, 3)
+
     # --- Client startup code: ---
-
-    async with websockets.connect("ws://127.0.0.1:5678/playerAPI") as websocket:
-        print("Connected to server")
-
-        # Start the sendTask and frameLoop
-        asyncio.get_event_loop().create_task(sendTask())
-        asyncio.get_event_loop().create_task(frameLoop())
-
-        # Handles incoming messages
-        while True:
-            message = await websocket.recv()
-            incoming.append(message)
-
-            logPrint("Received message from server: " + message, 2)
-
-if __name__ == "__main__":
-    # Execute only if run as a script
     try:
-        asyncio.get_event_loop().run_until_complete(runClient())
+        asyncio.get_event_loop().run_until_complete(mainTask())
     except ConnectionResetError:
         print("Lost connection to server - shutting down")
     except ConnectionRefusedError:
