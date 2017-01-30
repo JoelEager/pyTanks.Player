@@ -3,7 +3,8 @@ import websockets
 import datetime
 import config
 
-# This script handles communication with the server and runs the ai's loop function
+# The websocket client and asyncio functions
+#   Handles communication with the server and runs the ai's aiLoop function
 
 outgoing = list()   # The outgoing message queue
 
@@ -15,7 +16,7 @@ def sendCommand(command):
 def runClient(loopCallback):
     incoming = list()
 
-    # --- Internal client API functions: ---
+    # --- Internal websocket client functions: ---
 
     # Handles printing of debug info
     def logPrint(message, minLevel):
@@ -38,7 +39,7 @@ def runClient(loopCallback):
             else:
                 await asyncio.sleep(0.05)
 
-    # Runs aiPlayer.aiLoop() every frame and aims to hold the given frame rate
+    # Runs aiLoop() every frame and aims to hold the given frame rate
     #   Also handles extrapolation and updating of game state data
     async def frameLoop():
         # For frame rate targeting
@@ -104,7 +105,7 @@ def runClient(loopCallback):
 
                 logPrint("Received message from server: " + message, 2)
 
-    # --- Client startup code: ---
+    # --- Websocket client startup code: ---
     try:
         asyncio.get_event_loop().run_until_complete(mainTask())
     except ConnectionResetError:
