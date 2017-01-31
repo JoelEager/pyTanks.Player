@@ -91,7 +91,8 @@ def runClient(loopCallback):
 
     # Connects to the server, starts the other tasks, and handles incoming messages
     async def mainTask():
-        async with websockets.connect("ws://127.0.0.1:5678/playerAPI") as websocket:
+        async with websockets.connect("ws://" + config.clientSettings.ip + ":" + config.clientSettings.port +
+                                      config.clientSettings.apiPath) as websocket:
             print("Connected to server")
 
             # Start the sendTask and frameLoop
@@ -112,3 +113,8 @@ def runClient(loopCallback):
         print("Lost connection to server - shutting down")
     except ConnectionRefusedError:
         print("Could not connect to server - shutting down")
+    except websockets.exceptions.ConnectionClosed:
+        if len(incoming) != 0:
+            print("Received error message from server: " + incoming.pop())
+
+        print("Server closed connection - shutting down")

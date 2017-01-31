@@ -11,7 +11,8 @@ class gameSettings:
 
 class clientSettings:
     ip = "127.0.0.1"                # The server's IP address
-    port = 5678                     # Server's port
+    port = "5678"                   # Server's port
+    apiPath = "/pyTanksAPI/player"  # The player client API path to connect to the server on
     framesPerSecond = 60            # The target frame rate for the aiLoop function
 
     # Level of debugging logging for the websocket client
