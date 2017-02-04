@@ -118,3 +118,6 @@ def runClient(loopCallback):
             print("Received error message from server: " + incoming.pop())
 
         print("Server closed connection - shutting down")
+    except KeyboardInterrupt:
+        # Exit cleanly on ctrl-C
+        return
