@@ -7,7 +7,11 @@ class gameSettings:
         y = 500                         # In pixels
 
     class tankProps:
-        speed = 25                       # In pixels per second
+        speed = 25                      # In pixels per second
+        height = 10                     # In pixels
+        width = 10                      # In pixels
+
+    shellSpeed = 100                    # In pixels per second
 
 class clientSettings:
     ip = "127.0.0.1"                # The server's IP address

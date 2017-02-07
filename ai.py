@@ -15,7 +15,7 @@ def aiLoop(elapsedTime):
 
     if timeSinceLastCommand >= 5:
         timeSinceLastCommand = 0
-        wsClient.sendCommand(str(-math.pi / 2))
+        wsClient.sendCommand("change_heading")
 
 # Start the client with a reference to the aiLoop callback function
 wsClient.runClient(aiLoop)
