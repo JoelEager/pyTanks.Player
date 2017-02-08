@@ -1,5 +1,4 @@
 import wsClient
-import math
 
 # Main script of the pyTanks "player" client
 #   This script starts wsClient.py with a callback to its aiLoop() function
