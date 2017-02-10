@@ -94,7 +94,13 @@ def runClient(loopCallback):
 
             # Update gameState
             if len(incoming) != 0:
-                newGameState = json.loads(incoming.pop(), object_hook=dictToObj)
+                # Message received from server, try to decode it
+                message = incoming.pop()
+                try:
+                    newGameState = json.loads(message, object_hook=dictToObj)
+                except json.decoder.JSONDecodeError:
+                    # Message isn't JSON so it's probably an error from the server
+                    print("Received error message from server: " + message)
 
                 # Print the name of the player's tank if this is the first time a gameState has been received
                 if gameState is None:
