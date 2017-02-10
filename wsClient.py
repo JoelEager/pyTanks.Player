@@ -1,11 +1,13 @@
 import asyncio
 import websockets
 import datetime
+import json
 import config
 
 # The websocket client and asyncio functions
 #   Handles communication with the server and runs the ai's aiLoop function
 
+gameState = None    # The current game state (received from the server and extrapolated by the client)
 outgoing = list()   # The outgoing message queue
 
 # Sends a command to the server
@@ -28,6 +30,15 @@ def runClient(loopCallback):
         diff = datetime.datetime.now() - aTime
         return diff.seconds + (diff.microseconds / 1000000)
 
+    # Helper function for decoding json that turns a dict into a matching object
+    def dictToObj(dictIn):
+        class objOfDict:
+            def __init__(self):
+                for key, value in dictIn.items():
+                    setattr(self, key, value)
+
+        return objOfDict()
+
     # Sends queued messages to the server
     async def sendTask(websocket):
         while True:
@@ -39,9 +50,11 @@ def runClient(loopCallback):
             else:
                 await asyncio.sleep(0.05)
 
-    # Runs aiLoop() every frame and aims to hold the given frame rate
+    # Runs loopCallback() every frame and aims to hold the given frame rate
     #   Also handles extrapolation and updating of game state data
     async def frameLoop():
+        global gameState
+
         # For frame rate targeting
         lastFrameTime = datetime.datetime.now()
         baseDelay = 1 / config.clientSettings.framesPerSecond
@@ -79,12 +92,21 @@ def runClient(loopCallback):
                     frameCount = 0
                     lastFSPLog = datetime.datetime.now()
 
-            # TODO - Update game state
+            # Update gameState
             if len(incoming) != 0:
-                incoming.pop()
+                newGameState = json.loads(incoming.pop(), object_hook=dictToObj)
+
+                # Print the name of the player's tank if this is the first time a gameState has been received
+                if gameState is None:
+                    print("This AI has been given command of the " + newGameState.myTank.name)
+
+                gameState = newGameState
+            #else:
+            # TODO: Extrapolate the gameState
 
             # Run the callback
-            loopCallback(frameDelta)
+            if gameState is not None:
+                loopCallback(frameDelta)
 
             # Sleep until the next frame
             await asyncio.sleep(delay)  # (If this doesn't sleep then the other tasks can never be completed.)
