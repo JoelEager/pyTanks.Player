@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import datetime
 import json
+import math
 import config
 
 # The websocket client and asyncio functions
@@ -38,6 +39,12 @@ def runClient(loopCallback):
                     setattr(self, key, value)
 
         return objOfDict()
+
+    # Moves a game object the given distance along its current heading
+    #   The object must have the x, y, and heading properties
+    def moveObj(obj, distance):
+        obj.x += math.cos(obj.heading) * distance
+        obj.y += math.sin(obj.heading) * distance
 
     # Sends queued messages to the server
     async def sendTask(websocket):
@@ -107,8 +114,13 @@ def runClient(loopCallback):
                     print("This AI has been given command of the " + newGameState.myTank.name)
 
                 gameState = newGameState
-            #else:
-            # TODO: Extrapolate the gameState
+            elif gameState is not None:
+                # Extrapolate the gameState
+                totalDistance = config.gameSettings.tankProps.speed * frameDelta
+                moveObj(gameState.myTank, totalDistance)
+                for tank in gameState.tanks:
+                    if tank.moving:
+                        moveObj(gameState.tanks, totalDistance)
 
             # Run the callback
             if gameState is not None:
