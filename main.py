@@ -15,7 +15,7 @@ def aiLoop(elapsedTime):
 
     if timeSinceLastCommand >= 5:
         timeSinceLastCommand = 0
-        wsClient.issueCommand.turn(math.pi / 2)
+        wsClient.issueCommand.turn(wsClient.gameState.myTank.heading + (math.pi / 2))
 
 # Start the client with a reference to the aiLoop callback function
 wsClient.runClient(aiLoop)
