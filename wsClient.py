@@ -9,11 +9,44 @@ import config
 #   Handles communication with the server and runs the ai's aiLoop function
 
 gameState = None    # The current game state (received from the server and extrapolated by the client)
-outgoing = list()   # The outgoing message queue
+# TODO: Documentation on the contents of this object
 
-# Sends a command to the server
-def sendCommand(command):
-    outgoing.append(command)
+_outgoing = list()   # The outgoing message queue
+# Don't interact with this directly; use the functions in the issueCommand class below instead
+
+class issueCommand:
+    # Creates a JSON string for a given command and appends it to the outgoing queue
+    @staticmethod
+    def __appendCommand(name, arg=None):
+        command = dict()
+        command["action"] = name
+        if arg is not None:
+            command["arg"] = arg
+
+        _outgoing.append(json.dumps(command, separators=(',', ':')))
+
+    # Issues the fire command
+    #   heading - Direction to shoot in radians from the +x axis (independent of tank's heading)
+    @classmethod
+    def fire(cls, heading):
+        cls.__appendCommand(config.clientSettings.commands.fire, arg=heading)
+
+    # Issues the command to turn the tank
+    #   heading - New direction for the tank in radians from the +x axis
+    @classmethod
+    def turn(cls, heading):
+        cls.__appendCommand(config.clientSettings.commands.turn, arg=heading)
+
+    # Issues the command to stop the tank
+    @classmethod
+    def stop(cls):
+        cls.__appendCommand(config.clientSettings.commands.stop)
+
+    # Issues the command to make the tank drive forward
+    #   (It will continue to move at max speed until the stop command is issued)
+    @classmethod
+    def go(cls):
+        cls.__appendCommand(config.clientSettings.commands.go)
 
 # Connects to the server and configures the asyncio tasks used to run the client
 def runClient(loopCallback):
@@ -49,8 +82,8 @@ def runClient(loopCallback):
     # Sends queued messages to the server
     async def sendTask(websocket):
         while True:
-            if len(outgoing) != 0:
-                message = outgoing.pop(0)
+            if len(_outgoing) != 0:
+                message = _outgoing.pop(0)
                 await websocket.send(message)
 
                 logPrint("Sent message to server: " + message, 2)

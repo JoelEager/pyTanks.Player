@@ -21,3 +21,10 @@ class clientSettings:
 
     # Level of debugging logging for the websocket client
     logLevel = 1  # 0 for normal, 1 for FPS, 2 for all client status and io logs
+
+    # String names for the commands the player can send
+    class commands:
+        fire = "Command_Fire"
+        turn = "Command_Turn"
+        stop = "Command_Stop"
+        go = "Command_Go"
