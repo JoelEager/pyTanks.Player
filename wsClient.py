@@ -11,19 +11,19 @@ import config
 gameState = None    # The current game state (received from the server and extrapolated by the client)
 # TODO: Documentation on the contents of this object
 
-_outgoing = list()   # The outgoing message queue
-# Don't interact with this directly; use the functions in the issueCommand class below instead
-
 class issueCommand:
+    _outgoing = list()   # The outgoing command queue
+    # Don't interact with this directly; use the functions in the issueCommand class below instead
+
     # Creates a JSON string for a given command and appends it to the outgoing queue
-    @staticmethod
-    def __appendCommand(name, arg=None):
+    @classmethod
+    def __appendCommand(cls, name, arg=None):
         command = dict()
         command["action"] = name
         if arg is not None:
             command["arg"] = arg
 
-        _outgoing.append(json.dumps(command, separators=(',', ':')))
+        cls._outgoing.append(json.dumps(command, separators=(',', ':')))
 
     # Issues the fire command
     #   heading - Direction to shoot in radians from the +x axis (independent of tank's heading)
@@ -66,12 +66,12 @@ def runClient(loopCallback):
 
     # Helper function for decoding json that turns a dict into a matching object
     def dictToObj(dictIn):
-        class objOfDict:
+        class objFromDict:
             def __init__(self):
                 for key, value in dictIn.items():
                     setattr(self, key, value)
 
-        return objOfDict()
+        return objFromDict()
 
     # Moves a game object the given distance along its current heading
     #   The object must have the x, y, and heading properties
@@ -82,8 +82,8 @@ def runClient(loopCallback):
     # Sends queued messages to the server
     async def sendTask(websocket):
         while True:
-            if len(_outgoing) != 0:
-                message = _outgoing.pop(0)
+            if len(issueCommand._outgoing) != 0:
+                message = issueCommand._outgoing.pop(0)
                 await websocket.send(message)
 
                 logPrint("Sent message to server: " + message, 2)
