@@ -11,9 +11,9 @@ import config
 gameState = None    # The current game state (received from the server and extrapolated by the client)
 # TODO: Documentation on the contents of this object
 
+# Don't interact with the outgoing list or appendCommand function directly; use the actual command functions instead
 class issueCommand:
     _outgoing = list()   # The outgoing command queue
-    # Don't interact with this directly; use the functions in the issueCommand class below instead
 
     # Creates a JSON string for a given command and appends it to the outgoing queue
     @classmethod
@@ -36,17 +36,20 @@ class issueCommand:
     @classmethod
     def turn(cls, heading):
         cls.__appendCommand(config.clientSettings.commands.turn, arg=heading)
+        gameState.myTank.heading = heading
 
     # Issues the command to stop the tank
     @classmethod
     def stop(cls):
         cls.__appendCommand(config.clientSettings.commands.stop)
+        gameState.myTank.moving = False
 
     # Issues the command to make the tank drive forward
     #   (It will continue to move at max speed until the stop command is issued)
     @classmethod
     def go(cls):
         cls.__appendCommand(config.clientSettings.commands.go)
+        gameState.myTank.moving = True
 
 # Connects to the server and configures the asyncio tasks used to run the client
 def runClient(loopCallback):
@@ -153,7 +156,7 @@ def runClient(loopCallback):
                 moveObj(gameState.myTank, totalDistance)
                 for tank in gameState.tanks:
                     if tank.moving:
-                        moveObj(gameState.tanks, totalDistance)
+                        moveObj(tank, totalDistance)
 
             # Run the callback
             if gameState is not None:
