@@ -8,33 +8,33 @@ import config
 #   The aiLoop() function is where the actual ai code lives
 
 timeSinceLastCommand = 0
+timeToNextAction = 0
 didTurn = False
 
 # Called once every frame by py
 #   elapsedTime:    The time elapsed in seconds since the last frame
 def aiLoop(elapsedTime):
-    global timeSinceLastCommand
-    global didTurn
+    global timeSinceLastCommand, didTurn, timeToNextAction
     timeSinceLastCommand += elapsedTime
 
     # Placeholder for actual AI logic
-    if timeSinceLastCommand >= 3:
+    if timeSinceLastCommand >= timeToNextAction:
         timeSinceLastCommand = 0
+        timeToNextAction = random.randrange(1, 60) / 20
         
-        action = random.randint(0, 2)
-        if action == 0 and wsClient.gameState.myTank.moving and not didTurn:
+        action = random.randint(0, 6)
+        if action == 0 and wsClient.gameState.myTank.moving:
+            wsClient.issueCommand.stop()
+            print("Stopped")
+        elif action >= 2 and not wsClient.gameState.myTank.moving:
+            wsClient.issueCommand.go()
+            print("Moving")
+        elif action >= 2 and not didTurn:
             wsClient.issueCommand.turn(wsClient.gameState.myTank.heading + (math.pi / 2))
             print("Turned")
-        elif action == 1:
-            wsClient.issueCommand.fire((math.pi / 2) * random.randint(0, 3))
-            print("Fired")
         else:
-            if wsClient.gameState.myTank.moving:
-                wsClient.issueCommand.stop()
-                print("Stopped")
-            else:
-                wsClient.issueCommand.go()
-                print("Moving")
+            wsClient.issueCommand.fire((math.pi / 4) * random.randint(0, 7))
+            print("Fired")
 
     # Half-hearted attempt to avoid running off the edge of the map
     if wsClient.gameState.myTank.moving:
@@ -48,5 +48,5 @@ def aiLoop(elapsedTime):
             wsClient.gameState.myTank.y > config.gameSettings.mapSize.y - 50 or wsClient.gameState.myTank.y < 50) and didTurn:
             didTurn = False
 
-    # Start the client with a reference to the aiLoop callback function
+# Start the client with a reference to the aiLoop callback function
 wsClient.runClient(aiLoop)
