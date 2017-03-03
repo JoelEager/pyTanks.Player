@@ -32,9 +32,10 @@ def aiLoop(elapsedTime):
         elif action >= 2 and not didTurn:
             wsClient.issueCommand.turn(wsClient.gameState.myTank.heading + (math.pi / 2))
             print("Turned")
-        else:
-            wsClient.issueCommand.fire((math.pi / 4) * random.randint(0, 7))
-            print("Fired")
+
+    if wsClient.issueCommand.canShoot() and random.randint(0, 4) == 0:
+        wsClient.issueCommand.fire((math.pi / 4) * random.randint(0, 7))
+        print("Fired")
 
     # Half-hearted attempt to avoid running off the edge of the map
     if wsClient.gameState.myTank.moving:

@@ -14,6 +14,8 @@ gameState = None    # The current game state (received from the server and extra
 # Don't interact with the outgoing list or appendCommand function directly; use the actual command functions instead
 class issueCommand:
     _outgoing = list()   # The outgoing command queue
+    # The datetime of this tank's last shot
+    __lastShotTime = datetime.datetime.now() - datetime.timedelta(seconds=config.gameSettings.tankProps.reloadTime)
 
     # Creates a JSON string for a given command and appends it to the outgoing queue
     @classmethod
@@ -25,10 +27,19 @@ class issueCommand:
 
         cls._outgoing.append(json.dumps(command, separators=(',', ':')))
 
+    # Checks if the tank can shoot again
+    #   If shots are fired faster than this the server will kick the player
+    #   returns - True if the tank can shoot, False if not
+    @classmethod
+    def canShoot(cls):
+        return datetime.timedelta(seconds=config.gameSettings.tankProps.reloadTime) <=\
+               datetime.datetime.now() - cls.__lastShotTime
+
     # Issues the fire command
     #   heading - Direction to shoot in radians from the +x axis (independent of tank's heading)
     @classmethod
     def fire(cls, heading):
+        cls.__lastShotTime = datetime.datetime.now()
         cls.__appendCommand(config.clientSettings.commands.fire, arg=heading)
 
     # Issues the command to turn the tank
@@ -61,11 +72,6 @@ def runClient(loopCallback):
     def logPrint(message, minLevel):
         if config.clientSettings.logLevel >= minLevel:
             print(message)
-
-    # Gets the delta between now and a given datetime in seconds
-    def timeDelta(aTime):
-        diff = datetime.datetime.now() - aTime
-        return diff.seconds + (diff.microseconds / 1000000)
 
     # Helper function for decoding json that turns a dict into a matching object
     def dictToObj(dictIn):
@@ -110,7 +116,7 @@ def runClient(loopCallback):
 
         while True:
             # Calculate the time passed in seconds and adds it to the list of deltas
-            frameDelta = timeDelta(lastFrameTime)
+            frameDelta = (datetime.datetime.now() - lastFrameTime).total_seconds()
             lastFrameTime = datetime.datetime.now()
             deltas.append(frameDelta)
             if len(deltas) > 15:
@@ -130,7 +136,7 @@ def runClient(loopCallback):
             if config.clientSettings.logLevel >= 1:
                 frameCount += 1
 
-                if timeDelta(lastFSPLog) >= 5:
+                if (datetime.datetime.now() - lastFSPLog).total_seconds() >= 5:
                     print("FPS: " + str(frameCount / 5))
                     frameCount = 0
                     lastFSPLog = datetime.datetime.now()
