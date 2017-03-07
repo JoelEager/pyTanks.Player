@@ -3,17 +3,15 @@ import websockets
 import datetime
 import json
 import math
+import socket
+
 import config
 
-# The websocket client and asyncio functions
-#   Handles communication with the server and runs the ai's aiLoop function
+# The pyTanks player client backend and asyncio code
+#   Handles communication with the server, extrapolating the gameState, and calling the ai's functions
 
-gameState = None    # The current game state (received from the server and extrapolated by the client)
-# TODO: Documentation on the contents of this object
-
-# Don't interact with the outgoing list or appendCommand function directly; use the actual command functions instead
-class issueCommand:
-    _outgoing = list()   # The outgoing command queue
+# Provides functions for generating commands and appending them to the outgoing queue
+class commandGenerator:
     # The datetime of this tank's last shot
     __lastShotTime = datetime.datetime.now() - datetime.timedelta(seconds=config.gameSettings.tankProps.reloadTime)
 
@@ -25,47 +23,46 @@ class issueCommand:
         if arg is not None:
             command["arg"] = arg
 
-        cls._outgoing.append(json.dumps(command, separators=(',', ':')))
+        outgoing.append(json.dumps(command, separators=(',', ':')))
 
     # Checks if the tank can shoot again
     #   If shots are fired faster than this the server will kick the player
     #   returns - True if the tank can shoot, False if not
-    @classmethod
-    def canShoot(cls):
+    def canShoot(self):
         return datetime.timedelta(seconds=config.gameSettings.tankProps.reloadTime) <=\
-               datetime.datetime.now() - cls.__lastShotTime
+               datetime.datetime.now() - self.__lastShotTime
 
     # Issues the fire command
     #   heading - Direction to shoot in radians from the +x axis (independent of tank's heading)
-    @classmethod
-    def fire(cls, heading):
-        cls.__lastShotTime = datetime.datetime.now()
-        cls.__appendCommand(config.clientSettings.commands.fire, arg=heading)
+    def fire(self, heading):
+        self.__lastShotTime = datetime.datetime.now()
+        self.__appendCommand(config.clientSettings.commands.fire, arg=heading)
 
     # Issues the command to turn the tank
     #   heading - New direction for the tank in radians from the +x axis
-    @classmethod
-    def turn(cls, heading):
-        cls.__appendCommand(config.clientSettings.commands.turn, arg=heading)
+    def turn(self, heading):
+        self.__appendCommand(config.clientSettings.commands.turn, arg=heading)
         gameState.myTank.heading = heading
 
     # Issues the command to stop the tank
-    @classmethod
-    def stop(cls):
-        cls.__appendCommand(config.clientSettings.commands.stop)
+    def stop(self):
+        self.__appendCommand(config.clientSettings.commands.stop)
         gameState.myTank.moving = False
 
     # Issues the command to make the tank drive forward
     #   (It will continue to move at max speed until the stop command is issued)
-    @classmethod
-    def go(cls):
-        cls.__appendCommand(config.clientSettings.commands.go)
+    def go(self):
+        self.__appendCommand(config.clientSettings.commands.go)
         gameState.myTank.moving = True
 
-# Connects to the server and configures the asyncio tasks used to run the client
-def runClient(loopCallback):
-    incoming = list()
+incoming = list()                        # The incoming message queue
+outgoing = list()                        # The outgoing command queue
+gameState = None                         # The current game state
+myCommandGenerator = commandGenerator()  # commandGenerator for passing to the AI's functions
 
+# Connects to the server and configures the asyncio tasks used to run the client
+def runClient(setupCallback, loopCallback):
+    global incoming, outgoing, gameState, myCommandGenerator
     # --- Internal websocket client functions: ---
 
     # Handles printing of debug info
@@ -91,19 +88,17 @@ def runClient(loopCallback):
     # Sends queued messages to the server
     async def sendTask(websocket):
         while True:
-            if len(issueCommand._outgoing) != 0:
-                message = issueCommand._outgoing.pop(0)
+            if len(outgoing) != 0:
+                message = outgoing.pop(0)
                 await websocket.send(message)
 
                 logPrint("Sent message to server: " + message, 2)
             else:
                 await asyncio.sleep(0.05)
 
-    # Runs loopCallback() every frame and aims to hold the given frame rate
+    # Runs loopCallback() every frame, setupCallback() on the first frame, and aims to hold the given frame rate
     #   Also handles extrapolation and updating of game state data
     async def frameLoop():
-        global gameState
-
         # For frame rate targeting
         lastFrameTime = datetime.datetime.now()
         baseDelay = 1 / config.clientSettings.framesPerSecond
@@ -142,21 +137,17 @@ def runClient(loopCallback):
                     lastFSPLog = datetime.datetime.now()
 
             # Update gameState
+            global gameState
+            firstFrameFlag = gameState is None
             if len(incoming) != 0:
                 # Message received from server, try to decode it
                 message = incoming.pop()
                 try:
-                    newGameState = json.loads(message, object_hook=dictToObj)
+                    gameState = json.loads(message, object_hook=dictToObj)
                 except json.decoder.JSONDecodeError:
                     # Message isn't JSON so print it
                     # (This is usually used to handle error messages)
                     print("Received non-JSON message from server: " + message)
-
-                # Print the name of the player's tank if this is the first time a gameState has been received
-                if gameState is None:
-                    print("This AI has been given command of the " + newGameState.myTank.name)
-
-                gameState = newGameState
             elif gameState is not None:
                 # Extrapolate the gameState
                 totalDistance = config.gameSettings.tankProps.speed * frameDelta
@@ -165,17 +156,21 @@ def runClient(loopCallback):
                     if tank.moving:
                         moveObj(tank, totalDistance)
 
-            # Run the callback
+            # Run the AI callback(s)
             if gameState is not None:
-                loopCallback(frameDelta)
+                if firstFrameFlag:
+                    print("This AI has been given command of the " + gameState.myTank.name)
+                    setupCallback(gameState, myCommandGenerator)
+
+                loopCallback(gameState, myCommandGenerator, frameDelta)
 
             # Sleep until the next frame
             await asyncio.sleep(delay)  # (If this doesn't sleep then the other tasks can never be completed.)
 
     # Connects to the server, starts the other tasks, and handles incoming messages
     async def mainTask():
-        async with websockets.connect("ws://" + config.clientSettings.ip + ":" + config.clientSettings.port +
-                                      config.clientSettings.apiPath) as websocket:
+        async with websockets.connect("ws://" + config.clientSettings.ipAndPort + config.clientSettings.apiPath) as \
+                websocket:
             print("Connected to server")
 
             # Start the sendTask and frameLoop
@@ -204,3 +199,5 @@ def runClient(loopCallback):
     except KeyboardInterrupt:
         # Exit cleanly on ctrl-C
         return
+    except socket.gaierror:
+        print("Invalid ip and/or port")
