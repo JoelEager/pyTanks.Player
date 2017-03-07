@@ -4,7 +4,7 @@ import math
 import config
 
 # The AI code of the pyTanks player client
-#   The two functions here are called by wsClient to run the AI code
+#   The two functions here are called by wsClient to run the AI code.
 
 timeSinceLastCommand = 0
 timeToNextAction = 0

@@ -1,4 +1,7 @@
 # Configuration settings for both the game and the client
+#   Fields marked with [*] can be freely changed since they don't need to match the server you're connecting to.
+#   Both clientSettings.logLevel and clientSettings.ipAndPort can be overridden by command line args so the value here
+#   is only the default.
 
 class gameSettings:
     class mapSize:
@@ -15,13 +18,13 @@ class gameSettings:
     shellSpeed = 100                    # In pixels per second
 
 class clientSettings:
-    # Both logLevel and ipAndPort can be overridden by command line args so the value here is only the default
-    ipAndPort = "localhost:9042"        # The server's IP address and port
-    logLevel = 1                        # Level of debugging logging for the websocket client
+
+    ipAndPort = "localhost:9042"        # [*] The server's IP address and port
+    logLevel = 1                        # [*] Level of debugging logging for the websocket client
     # (0 for minimal, 1 for FPS, 2 for all client status and io logs)
+    framesPerSecond = 60                # [*] The target frame rate for the aiLoop function
 
     apiPath = "/pyTanksAPI/player"      # The player client API path to connect to the server on
-    framesPerSecond = 60                # The target frame rate for the aiLoop function
 
     # String names for the commands the player can send
     class commands:

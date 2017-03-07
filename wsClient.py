@@ -8,7 +8,7 @@ import socket
 import config
 
 # The pyTanks player client backend and asyncio code
-#   Handles communication with the server, extrapolating the gameState, and calling the ai's functions
+#   Handles communication with the server, extrapolating the gameState, and calling the ai's functions.
 
 # Provides functions for generating commands and appending them to the outgoing queue
 class commandGenerator:
