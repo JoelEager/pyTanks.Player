@@ -37,7 +37,7 @@ def loop(gameState, issueCommand, elapsedTime):
             issueCommand.go()
             print("Moving")
         elif action >= 2 and not didTurn:
-            issueCommand.turn(gameState.myTank.heading + (math.pi / 2))
+            issueCommand.turn((math.pi / 4) * random.randint(0, 7))
             print("Turned")
 
     if issueCommand.canShoot() and random.randint(0, 4) == 0:
