@@ -13,7 +13,7 @@ import config
 # Provides functions for generating commands and appending them to the outgoing queue
 class commandGenerator:
     # The datetime of this tank's last shot
-    __lastShotTime = datetime.datetime.now() - datetime.timedelta(seconds=config.gameSettings.tankProps.reloadTime)
+    __lastShotTime = datetime.datetime.now() - datetime.timedelta(seconds=config.gameSettings.tank.reloadTime)
 
     # Creates a JSON string for a given command and appends it to the outgoing queue
     @classmethod
@@ -29,7 +29,7 @@ class commandGenerator:
     #   If shots are fired faster than this the server will kick the player
     #   returns - True if the tank can shoot, False if not
     def canShoot(self):
-        return datetime.timedelta(seconds=config.gameSettings.tankProps.reloadTime) <=\
+        return datetime.timedelta(seconds=config.gameSettings.tank.reloadTime) <=\
                datetime.datetime.now() - self.__lastShotTime
 
     # Issues the fire command
@@ -150,11 +150,15 @@ def runClient(setupCallback, loopCallback):
                     print("Received non-JSON message from server: " + message)
             elif gameState is not None:
                 # Extrapolate the gameState
-                totalDistance = config.gameSettings.tankProps.speed * frameDelta
+                totalDistance = config.gameSettings.tank.speed * frameDelta
                 moveObj(gameState.myTank, totalDistance)
                 for tank in gameState.tanks:
                     if tank.moving:
                         moveObj(tank, totalDistance)
+
+                totalDistance = config.gameSettings.shell.speed * frameDelta
+                for shell in gameState.shells:
+                    moveObj(shell, totalDistance)
 
             # Run the AI callback(s)
             if gameState is not None:
@@ -189,7 +193,7 @@ def runClient(setupCallback, loopCallback):
         asyncio.get_event_loop().run_until_complete(mainTask())
     except ConnectionResetError:
         print("Lost connection to server - shutting down")
-    except ConnectionRefusedError:
+    except (ConnectionRefusedError, OSError):
         print("Could not connect to server - shutting down")
     except websockets.exceptions.ConnectionClosed:
         if len(incoming) != 0:
