@@ -27,17 +27,16 @@ def loop(gameState, issueCommand, elapsedTime):
     if timeSinceLastCommand >= timeToNextAction:
         timeSinceLastCommand = 0
         timeToNextAction = random.randrange(1, 60) / 20
-        
-        action = random.randint(0, 6)
-        if action == 0 and gameState.myTank.moving:
-            issueCommand.stop()
-            print("Stopped")
-        elif action >= 2 and not gameState.myTank.moving:
-            issueCommand.go()
-            print("Moving")
-        elif action >= 2:
+
+        if not gameState.myTank.moving:
             issueCommand.turn((math.pi / 4) * random.randint(0, 7))
-            print("Turned")
+            issueCommand.go()
+            print("Turned and starting moving")
+        else:
+            action = random.randint(0, 1)
+            if action == 1:
+                issueCommand.turn((math.pi / 4) * random.randint(0, 7))
+                print("Turned")
 
     if issueCommand.canShoot() and random.randint(0, 4) == 0:
         issueCommand.fire((math.pi / 4) * random.randint(0, 7))
