@@ -136,9 +136,14 @@ def runClient(setupCallback, loopCallback):
                     frameCount = 0
                     lastFSPLog = datetime.datetime.now()
 
-            # Update gameState
+            # Update gameState and run AI the functions
             global gameState
-            firstFrameFlag = gameState is None
+            
+            gameStateWasNone = gameState is None
+            wasDead = False
+            if not gameStateWasNone:
+                wasDead = not gameState.myTank.alive
+
             if len(incoming) != 0:
                 # Message received from server, try to decode it
                 message = incoming.pop()
@@ -160,13 +165,18 @@ def runClient(setupCallback, loopCallback):
                 for shell in gameState.shells:
                     moveObj(shell, totalDistance)
 
-            # Run the AI callback(s)
             if gameState is not None:
-                if firstFrameFlag:
-                    print("This AI has been given command of the " + gameState.myTank.name)
-                    setupCallback(gameState, myCommandGenerator)
+                if gameStateWasNone:
+                    print("Received command of the " + gameState.myTank.name)
 
-                loopCallback(gameState, myCommandGenerator, frameDelta)
+                if gameState.myTank.alive:
+                    if wasDead:
+                        print("Tank spawned")
+                        setupCallback(gameState, myCommandGenerator)
+
+                    loopCallback(gameState, myCommandGenerator, frameDelta)
+                elif not wasDead:
+                    print("Tank killed")
 
             # Sleep until the next frame
             await asyncio.sleep(delay)  # (If this doesn't sleep then the other tasks can never be completed.)

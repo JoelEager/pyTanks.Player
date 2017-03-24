@@ -9,13 +9,13 @@ import config
 timeSinceLastCommand = 0
 timeToNextAction = 0
 
-# Called after the client has connected and been given a tank
+# Called when the AI's tank spawns
 #   gameState:      An up to date version of the game's state - TODO: Documentation on the contents of this object
 #   issueCommand:   Reference to a class that allows the issuing of commands
 def setup(gameState, issueCommand):
     pass
 
-# Called once every frame
+# Called once every frame while the tank is alive
 #   gameState:      An up to date version of the game's state - TODO: Documentation on the contents of this object
 #   issueCommand:   Reference to a class that allows the issuing of commands
 #   elapsedTime:    The time elapsed in seconds since the last frame
