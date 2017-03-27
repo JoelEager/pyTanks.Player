@@ -41,4 +41,4 @@ if __name__ == "__main__":
             print(usage.strip())
             sys.exit()
 
-    wsClient.runClient(tankAI.setup, tankAI.loop)
+    wsClient.runClient(tankAI.onSpawn, tankAI.onTick)

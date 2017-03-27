@@ -138,7 +138,7 @@ def runClient(setupCallback, loopCallback):
 
             # Update gameState and run AI the functions
             global gameState
-            
+
             gameStateWasNone = gameState is None
             wasDead = False
             if not gameStateWasNone:
