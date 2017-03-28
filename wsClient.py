@@ -140,13 +140,13 @@ def runClient(setupCallback, loopCallback):
             global gameState
 
             gameStateWasNone = gameState is None
-            wasDead = False
+            wasAlive = None
             if not gameStateWasNone:
-                wasDead = not gameState.myTank.alive
+                wasAlive = gameState.myTank.alive
 
             if len(incoming) != 0:
                 # Message received from server, try to decode it
-                message = incoming.pop()
+                message = incoming.pop(0)
                 try:
                     gameState = json.loads(message, object_hook=dictToObj)
                 except json.decoder.JSONDecodeError:
@@ -169,13 +169,15 @@ def runClient(setupCallback, loopCallback):
                 if gameStateWasNone:
                     print("Received command of the " + gameState.myTank.name)
 
-                if gameState.myTank.alive:
-                    if wasDead:
-                        print("Tank spawned")
-                        setupCallback(gameState, myCommandGenerator)
+                if gameState.ongoingGame:
+                    if gameState.myTank.alive:
+                        if not wasAlive:
+                            print("Tank spawned")
+                            setupCallback(gameState, myCommandGenerator)
 
-                    loopCallback(gameState, myCommandGenerator, frameDelta)
-                elif not wasDead:
+                        loopCallback(gameState, myCommandGenerator, frameDelta)
+
+                if not gameState.myTank.alive and wasAlive:
                     print("Tank killed")
 
             # Sleep until the next frame

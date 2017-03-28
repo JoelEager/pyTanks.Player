@@ -21,7 +21,6 @@ class gameSettings:
         width = 1                       # In pixels
 
 class clientSettings:
-
     ipAndPort = "localhost:9042"        # [*] The server's IP address and port
     logLevel = 1                        # [*] Level of debugging logging for the websocket client
     # (0 for minimal, 1 for FPS, 2 for all client status and io logs)
