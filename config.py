@@ -1,9 +1,9 @@
 # Configuration settings for both the game and the client
 #   Fields marked with [*] can be freely changed since they don't need to match the server you're connecting to.
-#   Both clientSettings.logLevel and clientSettings.ipAndPort can be overridden by command line args so the value here
+#   Both client.logLevel and client.ipAndPort can be overridden by command line args so the value here
 #   is only the default.
 
-class gameSettings:
+class game:
     class map:
         # (0, 0) is the upper left corner with +x going to the right and +y going down
         width = 500                     # In pixels
@@ -20,7 +20,7 @@ class gameSettings:
         height = 1                      # In pixels
         width = 1                       # In pixels
 
-class clientSettings:
+class client:
     ipAndPort = "localhost:9042"        # [*] The server's IP address and port
     logLevel = 1                        # [*] Level of debugging logging for the websocket client
     # (0 for minimal, 1 for FPS, 2 for all client status and io logs)

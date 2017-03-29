@@ -13,7 +13,7 @@ import config
 # Provides functions for generating commands and appending them to the outgoing queue
 class commandGenerator:
     # The datetime of this tank's last shot
-    __lastShotTime = datetime.datetime.now() - datetime.timedelta(seconds=config.gameSettings.tank.reloadTime)
+    __lastShotTime = datetime.datetime.now() - datetime.timedelta(seconds=config.game.tank.reloadTime)
 
     # Creates a JSON string for a given command and appends it to the outgoing queue
     @classmethod
@@ -29,30 +29,29 @@ class commandGenerator:
     #   If shots are fired faster than this the server will kick the player
     #   returns - True if the tank can shoot, False if not
     def canShoot(self):
-        return datetime.timedelta(seconds=config.gameSettings.tank.reloadTime) <=\
-               datetime.datetime.now() - self.__lastShotTime
+        return datetime.timedelta(seconds=config.game.tank.reloadTime) <= datetime.datetime.now() - self.__lastShotTime
 
     # Issues the fire command
     #   heading - Direction to shoot in radians from the +x axis (independent of tank's heading)
     def fire(self, heading):
         self.__lastShotTime = datetime.datetime.now()
-        self.__appendCommand(config.clientSettings.commands.fire, arg=heading)
+        self.__appendCommand(config.client.commands.fire, arg=heading)
 
     # Issues the command to turn the tank
     #   heading - New direction for the tank in radians from the +x axis
     def turn(self, heading):
-        self.__appendCommand(config.clientSettings.commands.turn, arg=heading)
+        self.__appendCommand(config.client.commands.turn, arg=heading)
         gameState.myTank.heading = heading
 
     # Issues the command to stop the tank
     def stop(self):
-        self.__appendCommand(config.clientSettings.commands.stop)
+        self.__appendCommand(config.client.commands.stop)
         gameState.myTank.moving = False
 
     # Issues the command to make the tank drive forward
     #   (It will continue to move at max speed until the stop command is issued)
     def go(self):
-        self.__appendCommand(config.clientSettings.commands.go)
+        self.__appendCommand(config.client.commands.go)
         gameState.myTank.moving = True
 
 incoming = list()                        # The incoming message queue
@@ -67,7 +66,7 @@ def runClient(setupCallback, loopCallback):
 
     # Handles printing of debug info
     def logPrint(message, minLevel):
-        if config.clientSettings.logLevel >= minLevel:
+        if config.client.logLevel >= minLevel:
             print(message)
 
     # Helper function for decoding json that turns a dict into a matching object
@@ -101,7 +100,7 @@ def runClient(setupCallback, loopCallback):
     async def frameLoop():
         # For frame rate targeting
         lastFrameTime = datetime.datetime.now()
-        baseDelay = 1 / config.clientSettings.framesPerSecond
+        baseDelay = 1 / config.client.framesPerSecond
         delay = baseDelay
         deltas = list()
 
@@ -119,16 +118,16 @@ def runClient(setupCallback, loopCallback):
 
             # Adjust delay to try to keep the actual frame rate within 5% of the target
             avgDelta = sum(deltas) / float(len(deltas))
-            if avgDelta * config.clientSettings.framesPerSecond < 0.95:  # Too fast
+            if avgDelta * config.client.framesPerSecond < 0.95:  # Too fast
                 delay += baseDelay * 0.01
-            elif avgDelta * config.clientSettings.framesPerSecond > 1.05:  # Too slow
+            elif avgDelta * config.client.framesPerSecond > 1.05:  # Too slow
                 delay -= baseDelay * 0.01
 
             if delay < 1 / 250:
                 delay = 1 / 250
 
             # Log FPS if server logging is enabled
-            if config.clientSettings.logLevel >= 1:
+            if config.client.logLevel >= 1:
                 frameCount += 1
 
                 if (datetime.datetime.now() - lastFSPLog).total_seconds() >= 5:
@@ -155,13 +154,13 @@ def runClient(setupCallback, loopCallback):
                     print("Received non-JSON message from server: " + message)
             elif gameState is not None:
                 # Extrapolate the gameState
-                totalDistance = config.gameSettings.tank.speed * frameDelta
+                totalDistance = config.game.tank.speed * frameDelta
                 moveObj(gameState.myTank, totalDistance)
                 for tank in gameState.tanks:
                     if tank.moving:
                         moveObj(tank, totalDistance)
 
-                totalDistance = config.gameSettings.shell.speed * frameDelta
+                totalDistance = config.game.shell.speed * frameDelta
                 for shell in gameState.shells:
                     moveObj(shell, totalDistance)
 
@@ -185,8 +184,7 @@ def runClient(setupCallback, loopCallback):
 
     # Connects to the server, starts the other tasks, and handles incoming messages
     async def mainTask():
-        async with websockets.connect("ws://" + config.clientSettings.ipAndPort + config.clientSettings.apiPath) as \
-                websocket:
+        async with websockets.connect("ws://" + config.client.ipAndPort + config.client.apiPath) as websocket:
             print("Connected to server")
 
             # Start the sendTask and frameLoop
