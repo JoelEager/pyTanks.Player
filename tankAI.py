@@ -39,5 +39,20 @@ def onTick(gameState, issueCommand, elapsedTime):
                 print("Turned")
 
     if issueCommand.canShoot() and random.randint(0, 4) == 0:
-        issueCommand.fire((math.pi / 4) * random.randint(0, 7))
+        # Select a target
+        while True:
+            target = random.randint(0, len(gameState.tanks) - 1)
+
+            if gameState.tanks[target].alive:
+                break
+
+        # Do the math
+        deltaX = abs(gameState.myTank.x - gameState.tanks[target].x)
+        deltaY = gameState.myTank.y - gameState.tanks[target].y
+        angle = math.atan(deltaY / deltaX)
+
+        if gameState.tanks[target].x < gameState.myTank.x:
+            angle = math.pi - angle
+
+        issueCommand.fire(angle)
         print("Fired")
