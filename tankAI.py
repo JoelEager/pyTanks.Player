@@ -32,11 +32,6 @@ def onTick(gameState, issueCommand, elapsedTime):
             issueCommand.turn((math.pi / 4) * random.randint(0, 7))
             issueCommand.go()
             print("Turned and starting moving")
-        else:
-            action = random.randint(0, 1)
-            if action == 1:
-                issueCommand.turn((math.pi / 4) * random.randint(0, 7))
-                print("Turned")
 
     if issueCommand.canShoot() and random.randint(0, 4) == 0:
         # Select a target
