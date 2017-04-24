@@ -33,7 +33,7 @@ def onTick(gameState, issueCommand, elapsedTime):
             issueCommand.go()
             print("Turned and starting moving")
 
-    if issueCommand.canShoot() and random.randint(0, 4) == 0:
+    if gameState.myTank.canShoot and random.randint(0, 4) == 0:
         # Select a target
         while True:
             target = random.randint(0, len(gameState.tanks) - 1)

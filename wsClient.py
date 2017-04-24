@@ -12,9 +12,6 @@ import config
 
 # Provides functions for generating commands and appending them to the outgoing queue
 class commandGenerator:
-    # The datetime of this tank's last shot
-    __lastShotTime = datetime.datetime.now() - datetime.timedelta(seconds=config.game.tank.reloadTime)
-
     # Creates a JSON string for a given command and appends it to the outgoing queue
     @classmethod
     def __appendCommand(cls, name, arg=None):
@@ -25,17 +22,14 @@ class commandGenerator:
 
         outgoing.append(json.dumps(command, separators=(',', ':')))
 
-    # Checks if the tank can shoot again
-    #   If shots are fired faster than this the server will kick the player
-    #   returns - True if the tank can shoot, False if not
-    def canShoot(self):
-        return datetime.timedelta(seconds=config.game.tank.reloadTime) <= datetime.datetime.now() - self.__lastShotTime
-
     # Issues the fire command
     #   heading - Direction to shoot in radians from the +x axis (independent of tank's heading)
+    #   Note: Will only send the command if gameState.myTank.canShoot is True. Commands to shot too quickly will be
+    #       silently ignored.
     def fire(self, heading):
-        self.__lastShotTime = datetime.datetime.now()
-        self.__appendCommand(config.client.commands.fire, arg=heading)
+        if gameState.myTank.canShoot:
+            gameState.myTank.canShoot = False
+            self.__appendCommand(config.client.commands.fire, arg=heading)
 
     # Issues the command to turn the tank
     #   heading - New direction for the tank in radians from the +x axis
