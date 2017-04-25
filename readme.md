@@ -19,8 +19,18 @@ Mostly functional but the AI is very simplistic.
 ```python start.py```
 
 The pyTanks player uses the settings found in config.py to control how the client works. Those values can be changed directly or be overridden by appending one or more of these command line args:
-- log=n - Overrides the default logging level. (Replace n with 0 for minimal logging, 1 for FPS logging only, or 2 for all client status and io logs.)
+- log=n - Overrides the default logging level.
 - ip:port - Overrides the ip and port used to connect to the server.
+
+Where the log level is one of:
+- 0 for no logging
+- 1 for connect/disconnect and errors
+- 2 for game events and AI logic
+- 3 for FPS
+- 4 for client IO
+- 5 for verbose websocket logs
+
+(All log events of a log level equal to or less than the set log level will be printed.)
 
 ---
 (For the other modules see the repos linked at the top of this readme.)

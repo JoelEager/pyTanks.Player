@@ -1,8 +1,7 @@
 import sys
 
 import config
-import wsClient
-import tankAI
+from clientLogic.wsClient import runClient
 
 # Main/startup script of the pyTanks player client
 #   This script checks any command line args provided, applies them to config.py, and then starts wsClient.py with
@@ -20,8 +19,7 @@ Usage:
 
     The pyTanks player uses the settings found in config.py to control how the client works. Those values can be
     changed directly or be overridden by appending one or more of these command line args:
-        log=n - Overrides the default logging level. (Replace n with 0 for minimal logging, 1 for FPS logging only,
-                                                        or 2 for all client status and io logs.)
+        log=n - Overrides the default logging level. (See the usage section of the readme.)
         ip:port - Overrides the ip and port used to connect to the server."""
 
 if __name__ == "__main__":
@@ -41,4 +39,4 @@ if __name__ == "__main__":
             print(usage.strip())
             sys.exit()
 
-    wsClient.runClient(tankAI.onSpawn, tankAI.onTick)
+    runClient()
