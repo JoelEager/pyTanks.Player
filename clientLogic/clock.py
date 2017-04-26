@@ -8,13 +8,13 @@ from aiLogic import tankAI
 from . import clientData
 from .logging import logPrint
 
-# TODO: File docs
+# The asyncio code that maintains a consistent frame rate and runs the on-frame logic
 
 # Moves a game object the given distance along its current heading
 #   The object must have the x, y, and heading properties
 def moveObj(obj, distance):
     obj.x += math.cos(obj.heading) * distance
-    obj.y += math.sin(obj.heading) * distance
+    obj.y -= math.sin(obj.heading) * distance
 
 # Helper function for decoding json that turns a dict into a matching object
 def dictToObj(dictIn):
@@ -24,6 +24,49 @@ def dictToObj(dictIn):
                 setattr(self, key, value)
 
     return objFromDict()
+
+# Updates gameState and runs AI the functions
+def onTick(frameDelta):
+    gameStateWasNone = clientData.gameState is None
+    wasAlive = None
+    if not gameStateWasNone:
+        wasAlive = clientData.gameState.myTank.alive
+
+    if len(clientData.incoming) != 0:
+        # Message received from server, try to decode it
+        message = clientData.incoming.pop(0)
+        try:
+            clientData.gameState = json.loads(message, object_hook=dictToObj)
+        except json.decoder.JSONDecodeError:
+            # Message isn't JSON so print it
+            # (This is usually used to handle error messages)
+            logPrint("Message from server: " + message, 1)
+    elif clientData.gameState is not None:
+        # Extrapolate the gameState
+        totalDistance = config.game.tank.speed * frameDelta
+        moveObj(clientData.gameState.myTank, totalDistance)
+        for tank in clientData.gameState.tanks:
+            if tank.moving:
+                moveObj(tank, totalDistance)
+
+        totalDistance = config.game.shell.speed * frameDelta
+        for shell in clientData.gameState.shells:
+            moveObj(shell, totalDistance)
+
+    if clientData.gameState is not None:
+        if gameStateWasNone:
+            logPrint("Received command of the " + clientData.gameState.myTank.name, 1)
+
+        if clientData.gameState.ongoingGame:
+            if clientData.gameState.myTank.alive:
+                if not wasAlive:
+                    logPrint("Tank spawned", 2)
+                    tankAI.onSpawn()
+
+                tankAI.onTick(frameDelta)
+
+        if not clientData.gameState.myTank.alive and wasAlive:
+            logPrint("Tank killed", 2)
 
 # Runs loopCallback() every frame, setupCallback() on the first frame, and aims to hold the given frame rate
 #   Also handles extrapolation and updating of game state data
@@ -65,47 +108,8 @@ async def clientClock():
                 frameCount = 0
                 lastFSPLog = datetime.now()
 
-        # Update gameState and run AI the functions
-        gameStateWasNone = clientData.gameState is None
-        wasAlive = None
-        if not gameStateWasNone:
-            wasAlive = clientData.gameState.myTank.alive
-
-        if len(clientData.incoming) != 0:
-            # Message received from server, try to decode it
-            message = clientData.incoming.pop(0)
-            try:
-                clientData.gameState = json.loads(message, object_hook=dictToObj)
-            except json.decoder.JSONDecodeError:
-                # Message isn't JSON so print it
-                # (This is usually used to handle error messages)
-                logPrint("Message from server: " + message, 1)
-        elif clientData.gameState is not None:
-            # Extrapolate the gameState
-            totalDistance = config.game.tank.speed * frameDelta
-            moveObj(clientData.gameState.myTank, totalDistance)
-            for tank in clientData.gameState.tanks:
-                if tank.moving:
-                    moveObj(tank, totalDistance)
-
-            totalDistance = config.game.shell.speed * frameDelta
-            for shell in clientData.gameState.shells:
-                moveObj(shell, totalDistance)
-
-        if clientData.gameState is not None:
-            if gameStateWasNone:
-                logPrint("Received command of the " + clientData.gameState.myTank.name, 1)
-
-            if clientData.gameState.ongoingGame:
-                if clientData.gameState.myTank.alive:
-                    if not wasAlive:
-                        logPrint("Tank spawned", 2)
-                        tankAI.onSpawn()
-
-                    tankAI.onTick(frameDelta)
-
-            if not clientData.gameState.myTank.alive and wasAlive:
-                logPrint("Tank killed", 2)
+        # Now do the logic for this frame
+        onTick(frameDelta)
 
         # Sleep until the next frame
         await asyncio.sleep(delay)  # (If this doesn't sleep then the other tasks can never be completed.)
