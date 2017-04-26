@@ -12,12 +12,12 @@ from .logging import logPrint
 
 # Moves a game object the given distance along its current heading
 #   The object must have the x, y, and heading properties
-def moveObj(obj, distance):
+def __moveObj(obj, distance):
     obj.x += math.cos(obj.heading) * distance
     obj.y -= math.sin(obj.heading) * distance
 
 # Helper function for decoding json that turns a dict into a matching object
-def dictToObj(dictIn):
+def __dictToObj(dictIn):
     class objFromDict:
         def __init__(self):
             for key, value in dictIn.items():
@@ -26,7 +26,7 @@ def dictToObj(dictIn):
     return objFromDict()
 
 # Updates gameState and runs AI the functions
-def onTick(frameDelta):
+def __onTick(frameDelta):
     gameStateWasNone = clientData.gameState is None
     wasAlive = None
     if not gameStateWasNone:
@@ -36,7 +36,7 @@ def onTick(frameDelta):
         # Message received from server, try to decode it
         message = clientData.incoming.pop(0)
         try:
-            clientData.gameState = json.loads(message, object_hook=dictToObj)
+            clientData.gameState = json.loads(message, object_hook=__dictToObj)
         except json.decoder.JSONDecodeError:
             # Message isn't JSON so print it
             # (This is usually used to handle error messages)
@@ -44,14 +44,14 @@ def onTick(frameDelta):
     elif clientData.gameState is not None:
         # Extrapolate the gameState
         totalDistance = config.game.tank.speed * frameDelta
-        moveObj(clientData.gameState.myTank, totalDistance)
+        __moveObj(clientData.gameState.myTank, totalDistance)
         for tank in clientData.gameState.tanks:
             if tank.moving:
-                moveObj(tank, totalDistance)
+                __moveObj(tank, totalDistance)
 
         totalDistance = config.game.shell.speed * frameDelta
         for shell in clientData.gameState.shells:
-            moveObj(shell, totalDistance)
+            __moveObj(shell, totalDistance)
 
     if clientData.gameState is not None:
         if gameStateWasNone:
@@ -109,7 +109,7 @@ async def clientClock():
                 lastFSPLog = datetime.now()
 
         # Now do the logic for this frame
-        onTick(frameDelta)
+        __onTick(frameDelta)
 
         # Sleep until the next frame
         await asyncio.sleep(delay)  # (If this doesn't sleep then the other tasks can never be completed.)

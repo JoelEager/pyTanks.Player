@@ -12,7 +12,7 @@ import config
 __running = True        # The asyncio event loop will end when this is set to False
 
 # Sends queued messages to the server
-async def sendTask(websocket):
+async def __sendTask(websocket):
     while True:
         if len(clientData.outgoing) != 0:
             message = clientData.outgoing.pop(0)
@@ -23,7 +23,7 @@ async def sendTask(websocket):
             await asyncio.sleep(0.05)
 
 # Handles incoming messages
-async def receiveTask(websocket):
+async def __receiveTask(websocket):
     while True:
         message = await websocket.recv()
         clientData.incoming.append(message)
@@ -31,13 +31,13 @@ async def receiveTask(websocket):
         logPrint("Received message from server: " + message, 4)
 
 # Connects to the server and starts the tasks
-async def clientMain():
+async def __clientMain():
     async with websockets.connect("ws://" + config.client.ipAndPort + config.client.apiPath) as websocket:
         logPrint("Connected to server", 1)
 
         # Start up the tasks
-        asyncio.get_event_loop().create_task(sendTask(websocket))
-        asyncio.get_event_loop().create_task(receiveTask(websocket))
+        asyncio.get_event_loop().create_task(__sendTask(websocket))
+        asyncio.get_event_loop().create_task(__receiveTask(websocket))
         asyncio.get_event_loop().create_task(clientClock())
 
         # Stay around until the running flag is set to False
@@ -59,7 +59,7 @@ def runClient():
 
     try:
         asyncio.get_event_loop().set_exception_handler(handleException)
-        asyncio.get_event_loop().run_until_complete(clientMain())
+        asyncio.get_event_loop().run_until_complete(__clientMain())
     except ConnectionResetError:
         return
     except (ConnectionRefusedError, OSError):
