@@ -18,7 +18,7 @@ Mostly functional but the AI is very simplistic.
 ### Usage
 ```python start.py```
 
-The pyTanks player uses the settings found in config.py to control how the client works. Those values can be changed directly or be overridden by appending one or more of these command line args:
+The pyTanks player uses the settings found in `config.py` to control how the client works. Those values can be changed directly or be overridden by appending one or more of these command line args:
 - log=n - Overrides the default logging level.
 - ip:port - Overrides the ip and port used to connect to the server.
 
@@ -34,7 +34,7 @@ Where the log level is one of:
 
 ## Documentation on the API and AI development
 
-The AI's code lives in aiLogic/tankAI.py. (That whole folder is meant for AI-specific code.) In that file you'll find the 2 callbacks that will form the core of the AI. Currently they just hold the code for a simplistic, example AI.
+The AI's code lives in `aiLogic/tankAI.py`. (That whole folder is meant for AI-specific code.) In that file you'll find the 2 callbacks that will form the core of the AI. Currently they just hold the code for a simplistic, example AI.
 
 A few things to keep in mind:
 - Your tank will die with one hit.
@@ -47,17 +47,17 @@ A few things to keep in mind:
 To send a command call one of the functions in `clientLogic.commands`. The documentation on each function explains its args and what the command does.
 
 Here's a quick overview:
-- fire(heading) - Shoots in the direction of heading. Automatically capped to the tank's rate of fire by both the actual function and the server-side logic.
-- turn(heading) - Turns the tank to the new heading.
-- stop() - Tells the tank to stop moving.
-- go() - Tells the tank to start moving.
+- `fire(heading)` - Shoots in the direction of heading. Automatically capped to the tank's rate of fire by both the actual function and the server-side logic.
+- `turn(heading)` - Turns the tank to the new heading.
+- `stop()` - Tells the tank to stop moving.
+- `go()` - Tells the tank to start moving.
 
-Behind the scenes each of these functions will feed your arguments and the correct string from config.py into a function that appends the JSON representation of the command onto the outgoing queue. That will then be sent off to the server and be applied to the game. The command functions also apply the action to the local gameState variable so it always matches the most recent AI commands.
+Behind the scenes each of these functions will feed your arguments and the correct string from `config.py` into a function that appends the JSON representation of the command onto the outgoing queue. That will then be sent off to the server and be applied to the game. The command functions also apply the action to the local gameState variable so it always matches the most recent AI commands.
 
 ### The gameState variable
 (Found in `clientLogic.clientData.gameState`)
 
-The contents of the gameState variable come from the state updates that the server sends. The code in clock.py and commands.py extrapolate on it every frame to ensure that it's up to date with movement and AI commands. Since the object is constructed on the fly from JSON you can refer to the below example to see what you can expect it to look like at runtime. The value will be assigned before any AI code is called so you can count on it matching this.
+The contents of the gameState variable come from the state updates that the server sends. The code in clock.py and commands.py extrapolate on it every frame to ensure that it's up to date with movement and AI commands. Since the object is constructed on the fly from JSON you can refer to the below code to see what you can expect it to look like at runtime. The value will be assigned before any AI code is called so you can count on it matching this.
 
 The JSON is turned into a valid Python object so values can be referenced using normal Python syntax. For example:
 ```python
@@ -112,7 +112,7 @@ gameState = {
 ```
 
 ### config.py
-config.py holds all the configuration values relevant to the game or client. Some of these can be modified to match your preference while most need to match the server's settings. (See the file for which are which.) However, the important bit is that these values can be referenced by the AI to make decisions. For example, if you want to know the speed of a tank just use this code:
+`config.py` holds all the configuration values relevant to the game or client. Some of these can be modified to match your preference while most need to match the server's settings. (See the file for which are which.) However, the important bit is that these values can be referenced by the AI to make decisions. For example, if you want to know the speed of a tank just use this code:
 ```python
 import config
 
@@ -127,7 +127,7 @@ from clientLogic.logging import logPrint
 logPrint("Did a thing", 2)
 ```
 
-The 2 is for the log level 2 which covers AI actions. However, nothing is stopping you from changing that.
+The 2 is for log level 2 which includes AI actions. However, nothing is stopping you from changing that if you want more flexibility in your logging.
 
 ---
 (For the other modules see the repos linked at the top of this readme.)
