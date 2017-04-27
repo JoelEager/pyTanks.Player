@@ -1,6 +1,8 @@
-# Holds the client's data structures
-incoming = list()                        # The incoming message queue
-outgoing = list()                        # The outgoing command queue
-gameState = None                         # The current game state
+"""
+Holds the client's data structures for easy access by both client and AI code
+"""
 
-# TODO: Document gameState here
+incoming = list()                       # The incoming message queue
+outgoing = list()                       # The outgoing command queue
+gameState = None                        # The current game state
+                                        # (See the gameState section of the readme for docs on this)

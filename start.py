@@ -1,26 +1,27 @@
+"""
+Main/startup script of the pyTanks player client
+    This script checks any command line args provided, applies them to config.py and then starts wsClient.py
+    
+Requirements:
+    Python 3.5 or newer
+    websockets 3.3 (pip install websockets==3.3)
+
+Usage:
+    python start.py
+    
+    The pyTanks player uses the settings found in config.py to control how the client works. Those values can be
+    changed directly or be overridden by appending one or more of these command line args:
+        log=n - Overrides the default logging level. (See the usage section of the readme.)
+        ip:port - Overrides the ip and port used to connect to the server.
+"""
+
 import sys
 
 import config
 from clientLogic.wsClient import runClient
 
-# Main/startup script of the pyTanks player client
-#   This script checks any command line args provided, applies them to config.py, and then starts wsClient.py with
-#   references to the setup and loop functions in tankAI.py.
-#
-#   Requirements:
-#       Python 3.5 or newer
-#       websockets package (pip install websockets)
-#
-#   (See the below string for usage information.)
 
-usage = """
-Usage:
-    python start.py
-
-    The pyTanks player uses the settings found in config.py to control how the client works. Those values can be
-    changed directly or be overridden by appending one or more of these command line args:
-        log=n - Overrides the default logging level. (See the usage section of the readme.)
-        ip:port - Overrides the ip and port used to connect to the server."""
+usage = __doc__[__doc__.index("Usage:"):].strip()
 
 if __name__ == "__main__":
     for arg in sys.argv:
@@ -36,7 +37,7 @@ if __name__ == "__main__":
         elif ":" in arg:
             config.client.ipAndPort = arg
         else:
-            print(usage.strip())
+            print(usage)
             sys.exit()
 
     runClient()

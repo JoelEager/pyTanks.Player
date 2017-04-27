@@ -1,3 +1,7 @@
+"""
+Starts up the asyncio tasks and handles the websocket io logic
+"""
+
 import asyncio
 import websockets
 import socket
@@ -7,12 +11,12 @@ from .logging import logPrint
 from .clock import clientClock
 import config
 
-# The pyTanks player client backend and asyncio code
-
 __running = True        # The asyncio event loop will end when this is set to False
 
-# Sends queued messages to the server
 async def __sendTask(websocket):
+    """
+    Send messages to the server as they are appended to the outgoing queue
+    """
     while True:
         if len(clientData.outgoing) != 0:
             message = clientData.outgoing.pop(0)
@@ -22,16 +26,20 @@ async def __sendTask(websocket):
         else:
             await asyncio.sleep(0.05)
 
-# Handles incoming messages
 async def __receiveTask(websocket):
+    """
+    Append incoming messages from the server to the incoming queue for handling by clock.py
+    """
     while True:
         message = await websocket.recv()
         clientData.incoming.append(message)
 
         logPrint("Received message from server: " + message, 4)
 
-# Connects to the server and starts the tasks
 async def __clientMain():
+    """
+    Connect to the server and start the asyncio tasks
+    """
     async with websockets.connect("ws://" + config.client.ipAndPort + config.client.apiPath) as websocket:
         logPrint("Connected to server", 1)
 
@@ -44,10 +52,15 @@ async def __clientMain():
         while __running:
             await asyncio.sleep(0.1)
 
-# Spin up async io with the clientMain task
 def runClient():
-    # Used to close the connection and stop the async tasks on an exception
+    """
+    Spin up the async io client with the clientMain task
+    """
     def handleException(loop, context):
+        """
+        Closes the websocket and stops the async tasks on an exception
+            Called by asyncio on an exception
+        """
         global __running
         __running = False
 

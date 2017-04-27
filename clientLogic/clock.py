@@ -1,3 +1,7 @@
+"""
+The asyncio code that maintains a consistent frame rate and runs the on-frame logic
+"""
+
 import math
 import json
 from datetime import datetime
@@ -8,16 +12,19 @@ from aiLogic import tankAI
 from . import clientData
 from .logging import logPrint
 
-# The asyncio code that maintains a consistent frame rate and runs the on-frame logic
-
-# Moves a game object the given distance along its current heading
-#   The object must have the x, y, and heading properties
 def __moveObj(obj, distance):
+    """
+    Moves a game object the given distance along its current heading
+    :param obj: An object with x, y, and heading properties
+    :param distance: The distance to move in pixels
+    """
     obj.x += math.cos(obj.heading) * distance
     obj.y -= math.sin(obj.heading) * distance
 
-# Helper function for decoding json that turns a dict into a matching object
 def __dictToObj(dictIn):
+    """
+    Turns a dictionary into a matching object
+    """
     class objFromDict:
         def __init__(self):
             for key, value in dictIn.items():
@@ -25,8 +32,11 @@ def __dictToObj(dictIn):
 
     return objFromDict()
 
-# Updates gameState and runs AI the functions
 def __onTick(frameDelta):
+    """
+    On tick logic that updates the gameState and runs AI the functions
+    :param frameDelta: The time, in seconds, since the last call to this function
+    """
     gameStateWasNone = clientData.gameState is None
     wasAlive = None
     if not gameStateWasNone:
@@ -68,9 +78,10 @@ def __onTick(frameDelta):
         if not clientData.gameState.myTank.alive and wasAlive:
             logPrint("Tank killed", 2)
 
-# Runs loopCallback() every frame, setupCallback() on the first frame, and aims to hold the given frame rate
-#   Also handles extrapolation and updating of game state data
 async def clientClock():
+    """
+    Maintains a consistent frame rate as set in config.py and calls onTick() every frame
+    """
     # For frame rate targeting
     lastFrameTime = datetime.now()
     baseDelay = 1 / config.client.framesPerSecond
