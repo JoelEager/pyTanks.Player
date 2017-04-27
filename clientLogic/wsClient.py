@@ -6,12 +6,9 @@ import asyncio
 import websockets
 import socket
 
-from . import clientData
+from . import clientData, clock
 from .logging import logPrint
-from .clock import clientClock
 import config
-
-__running = True        # The asyncio event loop will end when this is set to False
 
 async def __sendTask(websocket):
     """
@@ -46,11 +43,7 @@ async def __clientMain():
         # Start up the tasks
         asyncio.get_event_loop().create_task(__sendTask(websocket))
         asyncio.get_event_loop().create_task(__receiveTask(websocket))
-        asyncio.get_event_loop().create_task(clientClock())
-
-        # Stay around until the running flag is set to False
-        while __running:
-            await asyncio.sleep(0.1)
+        await clock.clientClock()
 
 def runClient():
     """
@@ -61,8 +54,7 @@ def runClient():
         Closes the websocket and stops the async tasks on an exception
             Called by asyncio on an exception
         """
-        global __running
-        __running = False
+        clock.running = False
 
         if "exception" in context:
             if isinstance(context["exception"], websockets.exceptions.ConnectionClosed):

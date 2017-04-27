@@ -23,7 +23,7 @@ class game:
 class client:
     # Both logLevel and ipAndPort can be overridden by command line args so the value here is only the default
     ipAndPort = "localhost:9042"        # [*] The server's IP address and port
-    logLevel = 4                        # [*] The amount of client-side logging (See the usage section of the readme)
+    logLevel = 3                        # [*] The amount of client-side logging (See the usage section of the readme)
 
     framesPerSecond = 60                # [*] The target frame rate for the clientClock and tankAI's onTick()
 

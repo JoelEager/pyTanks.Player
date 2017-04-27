@@ -8,7 +8,7 @@ pyTanks is a project in three modules:
 
 ### Requirements
 - Python 3.5 or newer
-- [websockets 3.3](https://github.com/aaugustin/websockets) (pip install websockets==3.3)
+- [websockets 3.3](https://github.com/aaugustin/websockets) (`pip install websockets==3.3`)
 
 **Note: pyTanks is currently in an "alpha" state. Feel free to play around with it and offer feedback but don't expect the code to be feature-complete or bug free.**
 
@@ -19,8 +19,8 @@ Mostly functional but the AI is very simplistic.
 ```python start.py```
 
 The pyTanks player uses the settings found in `config.py` to control how the client works. Those values can be changed directly or be overridden by appending one or more of these command line args:
-- log=n - Overrides the default logging level.
-- ip:port - Overrides the ip and port used to connect to the server.
+- `log=n` - Overrides the default logging level.
+- `ip:port` - Overrides the ip and port used to connect to the server.
 
 Where the log level is one of:
 - 0 for no logging
@@ -40,7 +40,7 @@ A few things to keep in mind:
 - Your tank will die with one hit.
 - Your tank will automatically stop (as in `gameState.myTank.moving = False`) when it hits another tank or a wall.
 - The list of enemy tanks is not guaranteed to stay in the same order.
-- All headings (both in commands.py and gameState) are in radians from the +x axis.
+- All headings (both in `commands.py` and `gameState`) are in radians from the +x axis.
 - Play nice.
 
 ### Sending commands
@@ -112,7 +112,7 @@ gameState = {
 ```
 
 ### config.py
-`config.py` holds all the configuration values relevant to the game or client. Some of these can be modified to match your preference while most need to match the server's settings. (See the file for which are which.) However, the important bit is that these values can be referenced by the AI to make decisions. For example, if you want to know the speed of a tank just use this code:
+`config.py` holds all the configuration values relevant to the game or client. Some of these can be modified to match your preference while most need to match the server's settings. (See the documentation in `config.py` itself for which are which.) However, the important bit is that these values can be referenced by the AI to make decisions. For example, if you want to know the speed of a tank just use this code:
 ```python
 import config
 

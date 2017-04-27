@@ -12,6 +12,8 @@ from aiLogic import tankAI
 from . import clientData
 from .logging import logPrint
 
+running = True          # The asyncio event loop will end when this is set to False
+
 def __moveObj(obj, distance):
     """
     Moves a game object the given distance along its current heading
@@ -92,7 +94,7 @@ async def clientClock():
     lastFSPLog = datetime.now()
     frameCount = 0
 
-    while True:
+    while running:
         # Calculate the time passed in seconds and adds it to the list of deltas
         frameDelta = (datetime.now() - lastFrameTime).total_seconds()
         lastFrameTime = datetime.now()
