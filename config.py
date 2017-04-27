@@ -25,7 +25,10 @@ class client:
 
     framesPerSecond = 60                # [*] The target frame rate for the clientClock and tankAI's onTick()
 
-    apiPath = "/pyTanksAPI/player"      # The player API path to connect to the server on
+    apiVersion = "alpha-0"              # Used to make sure the client and server versions match
+
+    # The player API path to connect to the server on
+    apiPath = "/pyTanksAPI/" + apiVersion + "/player"
 
     # String names for the commands the player can send
     class commands:
