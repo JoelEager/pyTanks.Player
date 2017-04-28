@@ -10,13 +10,13 @@ class game:
         height = 500                    # In pixels
 
     class tank:
-        speed = 25                      # In pixels per second
+        speed = 30                      # In pixels per second
         height = 10                     # In pixels
         width = 10                      # In pixels
-        reloadTime = 2                  # Minimum time to reload the tank's cannon (in seconds)
+        reloadTime = 1.5                # Minimum time to reload the tank's cannon (in seconds)
 
     class shell:
-        speed = 100                     # In pixels per second
+        speed = 150                     # In pixels per second
         height = 1                      # In pixels
         width = 1                       # In pixels
 
