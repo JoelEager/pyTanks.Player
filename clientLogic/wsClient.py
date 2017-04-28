@@ -72,5 +72,5 @@ def runClient():
     except KeyboardInterrupt:
         # Exit cleanly on ctrl-C
         return
-    except socket.gaierror:
+    except (socket.gaierror, ValueError):
         logPrint("Invalid ip and/or port", 1)

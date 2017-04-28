@@ -1,6 +1,5 @@
 """
-Main/startup script of the pyTanks player client
-    This script checks any command line args provided, applies them to config.py and then starts wsClient.py
+Startup script for the pyTanks player client
     
 Requirements:
     Python 3.5 or newer
@@ -16,14 +15,27 @@ Usage:
 """
 
 import sys
-
 import config
-from clientLogic.wsClient import runClient
 
+def main():
+    """
+    Check the environment, apply any command line args to config.py, and start wsClient.py
+    """
+    # Check Python version
+    if sys.version_info[0] < 3 or sys.version_info[1] < 5:
+        print("Python 3.5 or newer is required to run the pyTanks player client")
+        return
 
-usage = __doc__[__doc__.index("Usage:"):].strip()
+    # Check for websockets
+    from importlib import util
+    if util.find_spec("websockets") is None:
+        print("The websockets module is required to run the pyTanks player client")
+        return
 
-if __name__ == "__main__":
+    # Import the code that requires the above things
+    from clientLogic.wsClient import runClient
+
+    # Parse and apply the args
     for arg in sys.argv:
         if arg == sys.argv[0]:
             continue
@@ -32,12 +44,15 @@ if __name__ == "__main__":
                 config.client.logLevel = int(arg[-1:])
             except ValueError:
                 print("Invalid log level")
-                print(usage.strip())
-                sys.exit()
+                return
         elif ":" in arg:
             config.client.ipAndPort = arg
         else:
-            print(usage)
-            sys.exit()
+            print(__doc__[__doc__.index("Usage:"):].strip())
+            return
 
+    # Start the client
     runClient()
+
+if __name__ == "__main__":
+    main()

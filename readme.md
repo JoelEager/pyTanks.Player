@@ -13,8 +13,6 @@ pyTanks is a project in three modules:
 **Note: pyTanks is currently in an "alpha" state. Feel free to play around with it and offer feedback but don't expect the code to be feature-complete or bug free.**
 
 # Player
-Mostly functional but the AI is very simplistic.
-
 ### Usage
 ```python start.py```
 
