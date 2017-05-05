@@ -47,6 +47,7 @@ def onTick(elapsedTime):
 
         # Do the math
         deltaX = abs(gs.myTank.x - gs.tanks[target].x)
+        if deltaX == 0: return
         deltaY = gs.myTank.y - gs.tanks[target].y
         angle = math.atan(deltaY / deltaX)
 
