@@ -89,6 +89,7 @@ async def clientClock():
     baseDelay = 1 / config.client.framesPerSecond
     delay = baseDelay
     deltas = list()
+    minFPS = config.client.framesPerSecond
 
     # For calculating the FPS for logging
     lastFSPLog = datetime.now()
@@ -113,12 +114,18 @@ async def clientClock():
             delay = 1 / 250
 
         # Log FPS if server logging is enabled
-        if config.client.logLevel >= 1:
+        if config.client.logLevel >= 3:
+            if avgDelta != 0:
+                if 1 / avgDelta < minFPS:
+                    minFPS = 1 / avgDelta
+
             frameCount += 1
 
-            if (datetime.now() - lastFSPLog).total_seconds() >= 5:
-                print("FPS: " + str(frameCount / 5))
+            if (datetime.now() - lastFSPLog).total_seconds() >= config.client.fpsLogRate:
+                logPrint("FPS: avg=" + str(frameCount / config.client.fpsLogRate) + ", min=" +
+                         str(round(minFPS, 1)), 3)
                 frameCount = 0
+                minFPS = config.client.framesPerSecond
                 lastFSPLog = datetime.now()
 
         # Now do the logic for this frame

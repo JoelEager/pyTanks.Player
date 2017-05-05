@@ -26,6 +26,7 @@ class client:
     logLevel = 3                        # [*] The amount of client-side logging (See the usage section of the readme)
 
     framesPerSecond = 60                # [*] The target frame rate for the clientClock and tankAI's onTick()
+    fpsLogRate = 5                      # [*] How many seconds to wait between logging the current FPS
 
     apiVersion = "alpha-0"              # Used to make sure the client and server versions match
 
