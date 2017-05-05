@@ -28,7 +28,7 @@ class client:
     framesPerSecond = 60                # [*] The target frame rate for the clientClock and tankAI's onTick()
     fpsLogRate = 5                      # [*] How many seconds to wait between logging the current FPS
 
-    apiVersion = "alpha-0"              # Used to make sure the client and server versions match
+    apiVersion = "beta-0"              # Used to make sure the client and server versions match
 
     # The player API path to connect to the server on
     apiPath = "/pyTanksAPI/" + apiVersion + "/player"
