@@ -39,15 +39,16 @@ def onTick(elapsedTime):
 
     if gs.myTank.canShoot and random.randint(0, 4) == 0:
         # Select a target
-        for target in random.shuffle(gs.tanks):
-            if gs.tanks[target].alive:
+        random.shuffle(gs.tanks)
+        for target in gs.tanks:
+            if target.alive:
                 # Do the math
-                deltaX = abs(gs.myTank.x - gs.tanks[target].x)
+                deltaX = abs(gs.myTank.x - target.x)
                 if deltaX == 0: return
-                deltaY = gs.myTank.y - gs.tanks[target].y
+                deltaY = gs.myTank.y - target.y
                 angle = math.atan(deltaY / deltaX)
 
-                if gs.tanks[target].x < gs.myTank.x:
+                if target.x < gs.myTank.x:
                     angle = math.pi - angle
 
                 commands.fire(angle)
