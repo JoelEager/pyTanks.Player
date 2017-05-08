@@ -9,9 +9,6 @@ import math
 from clientLogic.logging import logPrint
 from clientLogic import clientData, commands
 
-timeSinceLastCommand = 0.0
-timeToNextAction = 0.0
-
 def onSpawn():
     """
     Called when the tank spawns in a new game
@@ -23,20 +20,15 @@ def onTick(elapsedTime):
     Called once every frame while the tank is alive
     :param elapsedTime: The time elapsed, in seconds, since the last frame
     """
-    global timeSinceLastCommand, timeToNextAction
     gs = clientData.gameState
-    timeSinceLastCommand += elapsedTime
 
-    # Placeholder for actual AI logic
-    if timeSinceLastCommand >= timeToNextAction:
-        timeSinceLastCommand = 0.0
-        timeToNextAction = random.randrange(1, 60) / 20
+    # Collided so try to get moving again
+    if not gs.myTank.moving:
+        commands.turn((math.pi / 4) * random.randint(0, 7))
+        commands.go()
+        logPrint("Turned and starting moving", 2)
 
-        if not gs.myTank.moving:
-            commands.turn((math.pi / 4) * random.randint(0, 7))
-            commands.go()
-            logPrint("Turned and starting moving", 2)
-
+    # Shooting logic
     if gs.myTank.canShoot and random.randint(0, 4) == 0:
         # Select a target
         random.shuffle(gs.tanks)
