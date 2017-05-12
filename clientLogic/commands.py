@@ -51,3 +51,13 @@ def go():
     """
     __appendCommand(config.client.commands.go)
     clientData.gameState.myTank.moving = True
+
+def setInfo(infoString):
+    """
+    Updates the info string for the player
+    :param infoString: The string to display in the viewer containing info such as authorship or a link to source code
+        The info string must be no more than 200 characters long (that limit can be changed by the server)
+        The string my contain URLs starting with http:// or https://
+    """
+    __appendCommand(config.client.commands.setInfo, arg=infoString)
+    clientData.gameState.myTank.info = infoString

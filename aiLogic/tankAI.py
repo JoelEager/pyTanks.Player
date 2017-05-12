@@ -9,11 +9,18 @@ import math
 from clientLogic.logging import logPrint
 from clientLogic import clientData, commands
 
+def onConnect():
+    """
+    Called when the player initially connects to the server but before the tank first spawns
+    """
+    commands.setInfo("Python player instance running the example AI.\n" +
+                     "Fork me at https://github.com/JoelEager/pyTanks.Player")
+
 def onSpawn():
     """
     Called when the tank spawns in a new game
     """
-    pass
+    commands.setInfo("boo")
 
 def onTick(elapsedTime):
     """

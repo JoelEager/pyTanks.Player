@@ -68,6 +68,7 @@ def __onTick(frameDelta):
     if clientData.gameState is not None:
         if gameStateWasNone:
             logPrint("Received command of the " + clientData.gameState.myTank.name, 1)
+            tankAI.onConnect()
 
         if clientData.gameState.ongoingGame:
             if clientData.gameState.myTank.alive:
@@ -92,7 +93,7 @@ async def clientClock():
     minFPS = config.client.framesPerSecond
 
     # For calculating the FPS for logging
-    lastFSPLog = datetime.now()
+    lastFPSLog = datetime.now()
     frameCount = 0
 
     while running:
@@ -121,12 +122,12 @@ async def clientClock():
 
             frameCount += 1
 
-            if (datetime.now() - lastFSPLog).total_seconds() >= config.client.fpsLogRate:
+            if (datetime.now() - lastFPSLog).total_seconds() >= config.client.fpsLogRate:
                 logPrint("FPS: avg=" + str(frameCount / config.client.fpsLogRate) + ", min=" +
                          str(round(minFPS, 1)), 3)
                 frameCount = 0
                 minFPS = config.client.framesPerSecond
-                lastFSPLog = datetime.now()
+                lastFPSLog = datetime.now()
 
         # Now do the logic for this frame
         __onTick(frameDelta)

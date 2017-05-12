@@ -56,6 +56,12 @@ def runClient():
         """
         clock.running = False
 
+        if len(clientData.incoming) != 0:
+            message = clientData.incoming.pop(0)
+            if message[0] == "[":
+                # It's probably an error message from the server so print it
+                logPrint("Message from server: " + message, 1)
+
         if "exception" in context:
             if isinstance(context["exception"], websockets.exceptions.ConnectionClosed):
                 logPrint("Connection closed - shutting down", 1)
