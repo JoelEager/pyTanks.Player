@@ -56,7 +56,10 @@ def __onTick(frameDelta):
     elif clientData.gameState is not None:
         # Extrapolate the gameState
         totalDistance = config.game.tank.speed * frameDelta
-        __moveObj(clientData.gameState.myTank, totalDistance)
+
+        if clientData.gameState.myTank.moving:
+            __moveObj(clientData.gameState.myTank, totalDistance)
+
         for tank in clientData.gameState.tanks:
             if tank.moving:
                 __moveObj(tank, totalDistance)
