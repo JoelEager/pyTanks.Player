@@ -115,10 +115,6 @@ gameState = {
 }
 ```
 
-**Notes:**
-- All XY values above address the center point of that object.
-- All headings (both in `commands.py` and `gameState`) are in radians counterclockwise from the +x axis.
-
 ### config.py
 `config.py` holds all the configuration values relevant to the game or client. Some of these can be modified to match your preference while most need to match the server's settings. (See the documentation in `config.py` itself for which are which.) However, the important bit is that these values can be referenced by the AI to make decisions. For example, if you want to know the speed of a tank just use this code:
 ```python
