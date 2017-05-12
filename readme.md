@@ -28,7 +28,6 @@ Where the log level is one of:
 - 2 for game events and AI logic
 - 3 for FPS
 - 4 for client IO
-- 5 for verbose websocket logs
 
 (All log events of a log level equal to or less than the set log level will be printed.)
 
