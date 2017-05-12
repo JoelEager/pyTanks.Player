@@ -23,7 +23,7 @@ def fire(heading):
     Issues the fire command
         Will only send the command if clientData.gameState.myTank.canShoot is True
         The server will also silently ignore commands to shot too quickly
-    :param heading: Direction to shoot in radians from the +x axis (independent of tank's heading)
+    :param heading: Direction to shoot in radians counterclockwise from the +x axis (independent of tank's heading)
     """
     if clientData.gameState.myTank.canShoot:
         clientData.gameState.myTank.canShoot = False
@@ -32,7 +32,7 @@ def fire(heading):
 def turn(heading):
     """
     Issues the command to turn the tank
-    :param heading: New direction for the tank in radians from the +x axis
+    :param heading: New direction for the tank in radians counterclockwise from the +x axis
     """
     __appendCommand(config.client.commands.turn, arg=heading)
     clientData.gameState.myTank.heading = heading
@@ -54,10 +54,10 @@ def go():
 
 def setInfo(infoString):
     """
-    Updates the info string for the player
+    Sets the info string for the player
     :param infoString: The string to display in the viewer containing info such as authorship or a link to source code
         The info string must be no more than 200 characters long (that limit can be changed by the server)
-        The string my contain URLs starting with http:// or https://
+        If the string contains URLs starting with http:// or https:// they will be displayed as clickable links
     """
     __appendCommand(config.client.commands.setInfo, arg=infoString)
     clientData.gameState.myTank.info = infoString

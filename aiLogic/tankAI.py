@@ -20,7 +20,7 @@ def onSpawn():
     """
     Called when the tank spawns in a new game
     """
-    commands.setInfo("boo")
+    pass
 
 def onTick(elapsedTime):
     """

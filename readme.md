@@ -39,18 +39,17 @@ The AI's code lives in `aiLogic/tankAI.py`. (That whole folder is meant for AI-s
 A few things to keep in mind:
 - Your tank will die with one hit.
 - Your tank will automatically stop (as in `gameState.myTank.moving = False`) when it hits another tank or a wall.
-- The list of enemy tanks is not guaranteed to stay in the same order.
-- All headings (both in `commands.py` and `gameState`) are in radians from the +x axis.
 - Play nice.
 
 ### Sending commands
-To send a command call one of the functions in `clientLogic.commands`. The documentation on each function explains its args and what the command does.
+To send a command call one of the functions in `clientLogic.commands`. The documentation on each function explains its arg (if it has one) and what the command does.
 
 Here's a quick overview:
 - `fire(heading)` - Shoots in the direction of heading. Automatically capped to the tank's rate of fire by both the actual function and the server-side logic.
 - `turn(heading)` - Turns the tank to the new heading.
 - `stop()` - Tells the tank to stop moving.
 - `go()` - Tells the tank to start moving.
+- `setInfo(infoString)` - Sets the info string for the player.
 
 Behind the scenes each of these functions will feed your arguments and the correct string from `config.py` into a function that appends the JSON representation of the command onto the outgoing queue. That will then be sent off to the server and be applied to the game. The command functions also apply the action to the local gameState variable so it always matches the most recent AI commands.
 
@@ -70,47 +69,55 @@ theirHeading = clientData.gameState.tanks[1].heading    # A float value for the 
 And here's the structure of the object (in JSON):
 ```
 gameState = {
-   "ongoingGame":true,
-   "myTank":{
-      "x":344.56081386562886,
-      "y":349.4948861343713,
-      "heading":5.497787143782138,
-      "moving":false,
-      "alive":true,
-      "name":"Crusader Mk III",
-      "canShoot":false
+   "ongoingGame":true,                      # True if a game is in progress, False if waiting for players
+   "myTank":{                               # The player's tank
+      "x":344.56081386562886,               # X pos of the tank's center
+      "y":349.4948861343713,                # Y pos of the tank's center
+      "heading":5.497787143782138,          # The tank's heading in radians counterclockwise from the +x axis
+      "moving":false,                       # Boolean for whether or not this tank is moving
+      "alive":true,                         # Boolean for whether or not this tank is alive
+      "kills":0,                            # Kills in the current round
+      "wins":0,                             # Rounds won
+      "info":"Python player instance...",   # The info string set by calling commands.setInfo()
+      "id":6,                               # The unqiue id for this tank
+      "name":"Crusader Mk III",             # The tank's name as it appears on the viewer
+      "canShoot":false                      # Boolean for whether or not this tank is ready to shoot
    },
    "tanks":[
       {
-         "x":57.308355339059325,
-         "y":94.69735533905933,
-         "heading":3.9269908169872414,
-         "moving":false,
-         "alive":false
+         "x":57.308355339059325,            # X pos of the tank's center
+         "y":94.69735533905933,             # Y pos of the tank's center
+         "heading":3.9269908169872414,      # The tank's heading in radians counterclockwise from the +x axis
+         "moving":false,                    # Boolean for whether or not this tank is moving
+         "alive":false,                     # Boolean for whether or not this tank is alive
+         "id":6                             # The unqiue id for this tank (this can be used for identification across frames)
       },
       ... (and so on)
    ],
    "shells":[
       {
-         "shooterId":23,
-         "x":492.58348412358544,
-         "y":290.7623424927426,
-         "heading":0.4799365983861276
+         "shooterId":23,                    # The id of the tank that shot this shell (matches tank.id)
+         "x":492.58348412358544,            # X pos of the shell's center
+         "y":290.7623424927426,             # Y pos of the shell's center
+         "heading":0.4799365983861276       # The shell's heading in radians counterclockwise from the +x axis
       },
       ... (and so on)
    ],
    "walls":[
       {
-         "height":70,
-         "width":25,
-         "y":147.0,
-         "x":136.5
+         "height":70,                       # The wall's height
+         "width":25,                        # The wall's width
+         "x":136.5,                         # X pos of the wall's center
+         "y":147.0                          # Y pos of the wall's center
       },
       ... (and so on)
    ]
 }
 ```
-**Note: All XY values above address the center point of that object.**
+
+**Notes:**
+- All XY values above address the center point of that object.
+- All headings (both in `commands.py` and `gameState`) are in radians counterclockwise from the +x axis.
 
 ### config.py
 `config.py` holds all the configuration values relevant to the game or client. Some of these can be modified to match your preference while most need to match the server's settings. (See the documentation in `config.py` itself for which are which.) However, the important bit is that these values can be referenced by the AI to make decisions. For example, if you want to know the speed of a tank just use this code:
