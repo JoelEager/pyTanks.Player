@@ -37,7 +37,7 @@ async def __clientMain():
     """
     Connect to the server and start the asyncio tasks
     """
-    async with websockets.connect("ws://" + config.client.ipAndPort + config.client.apiPath) as websocket:
+    async with websockets.connect("ws://" + config.client.ipAndPort + config.client.apiPath, timeout=3) as websocket:
         logPrint("Connected to server", 1)
 
         # Start up the tasks
