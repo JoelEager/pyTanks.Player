@@ -43,12 +43,12 @@ def __onTick(frameDelta):
     wasAlive = None
     if not gameStateWasNone:
         wasAlive = clientData.gameState.myTank.alive
-
     if len(clientData.incoming) != 0:
         # Message received from server, try to decode it
         message = clientData.incoming.pop(0)
         try:
             clientData.gameState = json.loads(message, object_hook=__dictToObj)
+            clientData.lastUpdate = datetime.now()
         except json.decoder.JSONDecodeError:
             # Message isn't JSON so print it
             # (This is usually used to handle error messages)
@@ -68,6 +68,14 @@ def __onTick(frameDelta):
         for shell in clientData.gameState.shells:
             __moveObj(shell, totalDistance)
 
+        # Check clientData.lastUpdate for connection timeout
+        if (datetime.now() - clientData.lastUpdate).total_seconds() > config.client.timeout:
+            logPrint("Connection to server timed out - attempting 'nice' disconnect...", 1)
+            global running
+            running = False
+            return
+
+    # Call the AI functions
     if clientData.gameState is not None:
         if gameStateWasNone:
             logPrint("Received command of the " + clientData.gameState.myTank.name, 1)
