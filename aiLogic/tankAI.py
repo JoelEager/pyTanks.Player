@@ -1,6 +1,6 @@
 """
 The player's AI code
-    The two functions here are called by clock.py to run the AI code
+    Functions here are called by clock.py to run the AI code
 """
 
 import random
